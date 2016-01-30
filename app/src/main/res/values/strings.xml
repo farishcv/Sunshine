@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Sunshine</string>
+    <string name="action_settings">Settings</string>
+    <string name="date">Today, January 30</string>
+    <string name="wheather1">21°</string>
+    <string name="wheather2">8°</string>
+</resources>
