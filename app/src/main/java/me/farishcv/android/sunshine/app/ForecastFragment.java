@@ -1,5 +1,6 @@
 package me.farishcv.android.sunshine.app;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +45,8 @@ public class ForecastFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
+            FetchWeatherTak weatherTak = new FetchWeatherTak();
+            weatherTak.execute("560025");
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -62,18 +64,38 @@ public class ForecastFragment extends Fragment {
         return rootview;
     }
 
-    public class FethcWeatherTak extends AsyncTask<Void, Void, Void> {
-        private final String LOG_TAG = FethcWeatherTak.class.getSimpleName();
+    public class FetchWeatherTak extends AsyncTask<String, Void, Void> {
+        private final String LOG_TAG = FetchWeatherTak.class.getSimpleName();
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(String... params) {
             HttpURLConnection urlconnection = null;
             BufferedReader reader = null;
 
             String forecastJsonStr = null;
 
+            String format = "json";
+            String units = "metric";
+            int numDays = 7;
+
             try {
-                URL url = new URL("http://api.openweathermap.org/data/2.5/weather?q=560025&mode=json&units=metric&cnt=7&appid=44db6a862fba0b067b1930da0d769e98");
+
+                final String FORECAST_BASE_URL =
+                        "http://api.openweathermap.org/data/2.5/weather?q=560025&mode=json&units=metric&cnt=7&appid=44db6a862fba0b067b1930da0d769e98";
+                final String QUERY_PARAM = "q";
+                final String FORMAT_PARAM = "mode";
+                final String UNITS_PARAM = "units";
+                final String DAYS_PARAM = "cnt";
+
+                Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
+                        .appendQueryParameter(QUERY_PARAM, params[0])
+                        .appendQueryParameter(FORMAT_PARAM, format)
+                        .appendQueryParameter(UNITS_PARAM, units)
+                        .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
+                        .build();
+
+                URL url = new URL(builtUri.toString());
+                Log.v(LOG_TAG, "Built URI" + builtUri.toString());
 
                 urlconnection = (HttpURLConnection) url.openConnection();
                 urlconnection.setRequestMethod("GET");
@@ -84,6 +106,8 @@ public class ForecastFragment extends Fragment {
                 if (inputStream == null) {
                     // Nothing to do.
                     return null;
+
+
                 }
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
